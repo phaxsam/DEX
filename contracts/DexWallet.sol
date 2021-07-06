@@ -25,7 +25,9 @@ function addToken(bytes32 ticker, address tokenAddress) onlyOwner external {
 }
 
 function deposit(uint amount,bytes32 ticker) external {
-
+require(tokenMapping[ticker].tokenAddress != address(0));
+IERC20(tokenMapping[ticker].tokenAddress).transferFrom(msg.sender, address(this), amount);
+balance[msg.sender][ticker] += amount;
 }
 
 function withdraw(uint amount, bytes32 ticker) external {

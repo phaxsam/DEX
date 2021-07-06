@@ -2,13 +2,20 @@ const  Dex = artifacts.require("Dex")
 const Link = artifacts.require("LINK")
 const truffleAssert = require("truffle-assertions");
 
-contract("Dex", accounts => {
+contract("Dex", accounts => { 
  // when creating a SELL marketb order, the seller must have enough tokens for the trade
   it("should throw an error when creating a sell  market other without adequate toekn balance", async () => {
 
     let dex = await Dex.deployed()
+    let link = await Link.deployed()
 
-       let balance = await dex.balance(accounts[0], web3.utils.fromUtf8("LINK"))
+    await dex.addToken(web3.utils.fromUtf8("LINK"), link.address);
+        await Link.approve(dex.address, 10000);
+        await dex.deposit(6000, web3.utils.fromUtf8("LINK"));
+
+
+    let balance = await dex.balance(accounts[0], web3.utils.fromUtf8("LINK")) 
+
          assert.equal(balance.toNumber(), 0, "initail LINK balance is not 0");
 
             await truffleAssert.reverts(dex.createMarketOrder(1, web3.utils.fromUtf8("LINK"), 10))
@@ -18,8 +25,14 @@ contract("Dex", accounts => {
 //when creating a BUY market order the buyer needs to have enough eth for the trade
 it("should throw an error when creating a BUY market order without adequate balance", async () => {
     let dex = await Dex.deployed()
-     
+     let eth = Ethereum.deployed()
+      
+     await dex.addToken(web3.utils.fromUtf8("ETH"), eth.address);
+        await eth.approve(dex.address, 10000);
+        await dex.deposit(6000, web3.utils.fromUtf8("ETH"));
+      
     let balance = await dex.balance(accounts[0], web3.utils.fromUtf8("ETH"))
+
     assert.equal(balance.toNumber(), 0, "initial ETH balance is not 0");
 
     await truffleAssert.reverts(dex.createMarketOrder(0, web3.utils.fromUtf8("LINK"), 10))
@@ -27,12 +40,15 @@ it("should throw an error when creating a BUY market order without adequate bala
 })
 
 //Market orders can be submitted  even if the order book is empty
-it("/Market orders can be submitted  even if the order book is empty", async () => {
+it("Market orders can be submitted  even if the order book is empty", async () => {
 
     let dex = await Dex.deployed()
         await dex.depositEth({value: 50000});
+
         let orderbook = await dex.getOrderBook(web3.utils.fromUtf8("LINK"), 0); //get buy side orderbook
+
         assert(orderbook.length == 0, "buy side orderbook length is not 0");
+
         await truffleAssert.passes(dex.createMarketOrder(0,web3.utils.fromUtf8("LINK"), 10))
     
 })
@@ -115,7 +131,7 @@ it("market orders should be filled untill the order book is empty or the market 
 
    })
 
-   //the token balances of thr limit order sellers should decrease with the amount filled
+  /* //the token balances of thr limit order sellers should decrease with the amount filled
     it("the token balances of the limit ordee sellers should decrease with the filled amount", async () => {
         let dex = await Dex.deployed()
         let link = await Link.deployed()
@@ -176,8 +192,11 @@ it("market orders should be filled untill the order book is empty or the market 
     // when creating  BUY market order the buyer needs to have enough ETH for the trade   
      it("should throw an error when creating a buy limit without adequate ETH balance", async () => {
          let dex = await Dex.deployed()
+         let eth = await Ethereum.deployed()
+           
 
          let balance = await dex.balances(accounts[4], web3.utils.fromUtf8("ETH"))
+
          assert.equal(balance.toNumber(), 0, "initial balance is not 0");
          await dex.createLimitOrder(1, web3.utils.fromUtf8("LINK"), 5, 300, {from: accounts[1]})
 
@@ -186,7 +205,7 @@ it("market orders should be filled untill the order book is empty or the market 
 
 
 
-
+*/
 
 
 })

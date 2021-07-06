@@ -6,6 +6,9 @@ contract("Dex", accounts => {
     it("should only be possible for owner to add tokens", async () => {
 let dex = await Dex.deployed()
 let link = await Link.deployed()
+  
+await dex.addToken(web3.utils.fromUtf8("LINK"), link.address, {from: accounts[0]})
+
  await truffleAssert.passes(
     dex.addToken(web3.utils.fromUtf8("LINK"), link.address, {from: accounts[0]})
 )
@@ -16,11 +19,14 @@ await truffleAssert.reverts(
 it("should handle deposit correctly", async () => {
     let dex = await Dex.deployed()
     let link = await Link.deployed()
-      await link.approve(Dex.address, 500) 
-      await dex.deposit(100, web3.utils.fromUtf8("LINK"));
+
+      await link.approve(Dex.address, 50000) 
+
+      await dex.deposit(5000, web3.utils.fromUtf8("LINK"));
+
      let balance = await dex.balance(accounts[0], web3.utils.fromUtf8("LINK"));
 
-      assert.equal(balance.toNumber(), 100);
+      assert.equal(balance.toNumber(), 5000);
     
       
 })
