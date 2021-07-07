@@ -20,7 +20,8 @@ it("should handle deposit correctly", async () => {
     let dex = await Dex.deployed()
     let link = await Link.deployed()
 
-      await link.approve(Dex.address, 50000) 
+      await dex.addToken(web3.utils.fromUtf8("LINK"), link.address);
+      await link.approve(Dex.address, 10000) 
 
       await dex.deposit(5000, web3.utils.fromUtf8("LINK"));
 
