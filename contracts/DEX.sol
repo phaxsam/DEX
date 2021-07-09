@@ -32,8 +32,8 @@ function createLimitOrder( Side side, bytes32 ticker, uint amount, uint price) p
 if(side == Side.BUY) {
     require(balance[msg.sender]["ETH"] >= amount * price );
 }
-else if(side == Side.SELL) {
-    require(balance[msg.sender]["ticker"] >= amount);
+if(side == Side.SELL) {
+    require(balance[msg.sender][ticker] >= amount);
 }
 Order[] storage orders = orderBook[ticker][uint(side)];
  orders.push(Order(nextOrderId, msg.sender, side, ticker, amount, price, 0));
@@ -76,10 +76,10 @@ function createMarketOrder( Side side, bytes32 ticker, uint amount) public {
    
     uint orderBookSide;
     if(side == Side.BUY) {
-        orderBookSide = 1;
+        side = Side.SELL;
     } 
     else{
-        orderBookSide = 0;
+        side = Side.BUY;
     }
     Order[] storage orders = orderBook[ticker][orderBookSide];
         // cost storage  cost = orders[i] * price;
@@ -105,7 +105,7 @@ function createMarketOrder( Side side, bytes32 ticker, uint amount) public {
             require(balance[msg.sender]["ETH"] >= filled * orders[i].price);
             //transfer eth from buyer to seller
             balance[msg.sender][ticker] = balance[msg.sender][ticker] + filled;
-             balance[msg.sender]["ETH"] = balance[msg.sender]["ETH"] - cost;
+            balance[msg.sender]["ETH"] = balance[msg.sender]["ETH"] - cost;
             // send tokens from seller to buy
             // send tokens from seller to buyer
 

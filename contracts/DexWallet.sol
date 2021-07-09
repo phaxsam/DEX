@@ -1,5 +1,7 @@
 pragma solidity  ^0.8.0;
 import "../node_modules/@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "../node_modules/@openzeppelin/contracts/token/ERC20/ERC20.sol";
+
 //import "../node_modules/@openzeppelin/contracts/utils/math/Math.sol";
 import "../node_modules/@openzeppelin/contracts/access/Ownable.sol";
  
@@ -24,11 +26,15 @@ function addToken(bytes32 ticker, address tokenAddress) onlyOwner external {
     tokenList.push(ticker);
 }
 
-function deposit(uint amount,bytes32 ticker) external {
-require(tokenMapping[ticker].tokenAddress != address(0));
-IERC20(tokenMapping[ticker].tokenAddress).transferFrom(msg.sender, address(this), amount);
-balance[msg.sender][ticker] += amount;
-}
+function deposit(uint amount, bytes32 ticker) external returns(bool _success) {
+        require(tokenMapping[ticker].tokenAddress != address(0));
+        IERC20(tokenMapping[ticker].tokenAddress).transferFrom(msg.sender, address(this), amount);
+        balance[msg.sender][ticker] += amount;  
+        _success = true;
+        //emit deposited(msg.sender, address(this), amount, ticker);
+
+        return _success;
+    }
 
 function withdraw(uint amount, bytes32 ticker) external {
     require(tokenMapping[ticker].tokenAddress != address(0));
@@ -36,5 +42,9 @@ function withdraw(uint amount, bytes32 ticker) external {
     balance[msg.sender][ticker] = balance[msg.sender][ticker] - amount;
     IERC20(tokenMapping[ticker].tokenAddress).transfer(msg.sender, amount);
 }
+
+// function getAllowance(address spender) public view returns (uint256) {
+//     IERC20(msg.sender).allowance(msg.sender, spender);
+// }
     
 }
